@@ -4,6 +4,4 @@ Can you merge a file with different content between release and main?
 
     If both branches have changed the same part of the same file, Git can't automatically decide which one is "correct", so it raises a merge conflict.
 
-🔥 What happens if the developer changed hello.txt in release, and you're merging into main?
------------------------------------------
-I am new changes
+🔥 What happens if the developer changed hello.txt in release, and you're merging into main
