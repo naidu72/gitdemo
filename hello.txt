@@ -1,2 +1,7 @@
-hello day2 testing...1 2 3
-Naidu working on main branch
+Can you merge a file with different content between release and main?
+
+✅ Yes, it is absolutely possible to merge a file (hello.txt) that has different content in both branches — but:
+
+    If both branches have changed the same part of the same file, Git can't automatically decide which one is "correct", so it raises a merge conflict.
+
+🔥 What happens if the developer changed hello.txt in release, and you're merging into main?
