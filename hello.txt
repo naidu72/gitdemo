@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-hello day2 testing...1 2 3
-Naidu working on main branch
-=======
-1
-2
-2
-4
-5
->>>>>>> 73587fb (making changes to day2)
+a
+b
+c
+d
+e
+f
+
