@@ -1,1 +1,5 @@
 i am day01 file <this line created by me day01>
+<<<<<<< HEAD
+=======
+This is another new line is added by <day01>
+>>>>>>> day01
