@@ -3,4 +3,4 @@ This is another new line is added by <day01>
 
 added 3rd line by  <day01> //added after the 2nd time
 Hey Good Moroning today is 7/10
-Hey I am another line of the same day 7/10
+// removed the previous line
