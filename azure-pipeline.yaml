@@ -1,38 +1,85 @@
 trigger:
-  - main  # or your default branch
+- main
+- develop
 
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
+jobs:
+- job: ShowLastCommitChanges
+  displayName: 'Show Last Commit Changes'
+  steps:
+  
   - checkout: self
-    fetchDepth: 0  # fetch full history to compare commits
-
+    fetchDepth: 2  # Only need last 2 commits
+    displayName: 'Checkout Repository'
+  
+  # Show last commit details
   - script: |
-      echo "##[group]🔍 Detecting changes..."
-
-      # Get the last commit hash on this branch
-      LAST_COMMIT=$(git rev-parse HEAD)
-      echo "Last Commit: $LAST_COMMIT"
-
-      # Get the previous commit (assuming linear history, or you can tweak for PRs)
-      PREV_COMMIT=$(git rev-parse HEAD~1)
-      echo "Previous Commit: $PREV_COMMIT"
-
-      echo "📁 Changed folders:"
-      git diff --name-only $PREV_COMMIT $LAST_COMMIT | awk -F/ '{print $1}' | sort -u
-
-      echo "📄 Changed files:"
-      git diff --name-only $PREV_COMMIT $LAST_COMMIT
-
-      echo "📑 Showing file contents:"
-      for file in $(git diff --name-only $PREV_COMMIT $LAST_COMMIT); do
-        echo "🔸 FILE: $file"
-        echo "--------------------------------------------------"
-        cat "$file"
-        echo "--------------------------------------------------"
+      echo "=== LAST COMMIT INFORMATION ==="
+      git log -1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s%n" --date=short
+      echo ""
+    displayName: 'Show Last Commit Info'
+  
+  # Show changed files in last commit
+  - script: |
+      echo "=== FILES CHANGED IN LAST COMMIT ==="
+      git show --name-only --pretty=format:""
+      echo ""
+    displayName: 'Show Changed Files'
+  
+  # Show changes by folder
+  - script: |
+      echo "=== CHANGES BY FOLDER ==="
+      # Get changed files and group by folder
+      git show --name-only --pretty=format:"" | while read file; do
+        if [ ! -z "$file" ]; then
+          folder=$(dirname "$file")
+          echo "$folder/$file"
+        fi
+      done | sort | awk -F'/' '{
+        if ($1 != prev_folder) {
+          if (prev_folder != "") print ""
+          print "📁 Folder: " $1
+          prev_folder = $1
+        }
+        print "   └── " $0
+      }'
+      echo ""
+    displayName: 'Show Changes by Folder'
+  
+  # Show detailed changes and file content
+  - script: |
+      echo "=== DETAILED CHANGES AND FILE CONTENT ==="
+      
+      # Get list of changed files
+      changed_files=$(git show --name-only --pretty=format:"")
+      
+      for file in $changed_files; do
+        if [ ! -z "$file" ]; then
+          echo ""
+          echo "==============================================="
+          echo "📄 FILE: $file"
+          echo "==============================================="
+          
+          # Show the diff for this file
+          echo ""
+          echo "🔄 CHANGES:"
+          echo "-------------------------------------------"
+          git show -- "$file"
+          
+          echo ""
+          echo "📋 CURRENT FILE CONTENT:"
+          echo "-------------------------------------------"
+          
+          # Check if file still exists (not deleted)
+          if [ -f "$file" ]; then
+            # Show file content with line numbers
+            cat -n "$file"
+          else
+            echo "❌ File was deleted in this commit"
+          fi
+          echo ""
+        fi
       done
-
-      echo "##[endgroup]"
-    displayName: "🔍 Show Changed Folders, Files, and Content"
-
+    displayName: 'Show File Changes and Content'
