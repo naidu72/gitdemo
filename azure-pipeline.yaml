@@ -6,80 +6,14 @@ pool:
   vmImage: 'ubuntu-latest'
 
 jobs:
-- job: ShowLastCommitChanges
-  displayName: 'Show Last Commit Changes'
+- job: ShowModifiedFiles
+  displayName: 'Show Modified Files'
   steps:
   
   - checkout: self
-    fetchDepth: 2  # Only need last 2 commits
+    fetchDepth: 2
     displayName: 'Checkout Repository'
   
-  # Show last commit details
   - script: |
-      echo "=== LAST COMMIT INFORMATION ==="
-      git log -1 --pretty=format:"Commit: %H%nAuthor: %an <%ae>%nDate: %ad%nMessage: %s%n" --date=short
-      echo ""
-    displayName: 'Show Last Commit Info'
-  
-  # Show changed files in last commit
-  - script: |
-      echo "=== FILES CHANGED IN LAST COMMIT ==="
       git show --name-only --pretty=format:""
-      echo ""
-    displayName: 'Show Changed Files'
-  
-  # Show changes by folder
-  - script: |
-      echo "=== CHANGES BY FOLDER ==="
-      # Get changed files and group by folder
-      git show --name-only --pretty=format:"" | while read file; do
-        if [ ! -z "$file" ]; then
-          folder=$(dirname "$file")
-          echo "$folder/$file"
-        fi
-      done | sort | awk -F'/' '{
-        if ($1 != prev_folder) {
-          if (prev_folder != "") print ""
-          print "📁 Folder: " $1
-          prev_folder = $1
-        }
-        print "   └── " $0
-      }'
-      echo ""
-    displayName: 'Show Changes by Folder'
-  
-  # Show detailed changes and file content
-  - script: |
-      echo "=== DETAILED CHANGES AND FILE CONTENT ==="
-      
-      # Get list of changed files
-      changed_files=$(git show --name-only --pretty=format:"")
-      
-      for file in $changed_files; do
-        if [ ! -z "$file" ]; then
-          echo ""
-          echo "==============================================="
-          echo "📄 FILE: $file"
-          echo "==============================================="
-          
-          # Show the diff for this file
-          echo ""
-          echo "🔄 CHANGES:"
-          echo "-------------------------------------------"
-          git show -- "$file"
-          
-          echo ""
-          echo "📋 CURRENT FILE CONTENT:"
-          echo "-------------------------------------------"
-          
-          # Check if file still exists (not deleted)
-          if [ -f "$file" ]; then
-            # Show file content with line numbers
-            cat -n "$file"
-          else
-            echo "❌ File was deleted in this commit"
-          fi
-          echo ""
-        fi
-      done
-    displayName: 'Show File Changes and Content'
+    displayName: 'Show Modified Files'
