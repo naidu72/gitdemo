@@ -1,0 +1,38 @@
+trigger:
+  - main  # or your default branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    fetchDepth: 0  # fetch full history to compare commits
+
+  - script: |
+      echo "##[group]🔍 Detecting changes..."
+
+      # Get the last commit hash on this branch
+      LAST_COMMIT=$(git rev-parse HEAD)
+      echo "Last Commit: $LAST_COMMIT"
+
+      # Get the previous commit (assuming linear history, or you can tweak for PRs)
+      PREV_COMMIT=$(git rev-parse HEAD~1)
+      echo "Previous Commit: $PREV_COMMIT"
+
+      echo "📁 Changed folders:"
+      git diff --name-only $PREV_COMMIT $LAST_COMMIT | awk -F/ '{print $1}' | sort -u
+
+      echo "📄 Changed files:"
+      git diff --name-only $PREV_COMMIT $LAST_COMMIT
+
+      echo "📑 Showing file contents:"
+      for file in $(git diff --name-only $PREV_COMMIT $LAST_COMMIT); do
+        echo "🔸 FILE: $file"
+        echo "--------------------------------------------------"
+        cat "$file"
+        echo "--------------------------------------------------"
+      done
+
+      echo "##[endgroup]"
+    displayName: "🔍 Show Changed Folders, Files, and Content"
+
